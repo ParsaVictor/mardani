@@ -84,6 +84,19 @@ class Server(unittest.TestCase):
         self.assertEqual(client.getresponse().status, 403)
         client.close()
 
+    def test_refused_write_reply_survives_a_slow_body(self):
+        """The server must read a refused body, or closing can reset the reply away (Windows CI)."""
+        body = b"x" * 70000
+        client = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
+        client.putrequest("POST", f"/api/campaigns/{self.cid}/paste")
+        client.putheader("Origin", "https://evil.example")
+        client.putheader("Content-Length", str(len(body)))
+        client.endheaders()
+        time.sleep(0.2)  # the reply is ready before the body arrives
+        client.send(body)
+        self.assertEqual(client.getresponse().status, 403)
+        client.close()
+
     def test_full_api_round_trip(self):
         status, raw, _ = self.call("POST", f"/api/campaigns/{self.cid}/paste", {"text": "Sarah Chen\nRecruiter at Acme\nWe're hiring a Deep Learning Engineer. Comment below!", "url": "https://www.linkedin.com/feed/update/55"})
         self.assertEqual(status, 200)

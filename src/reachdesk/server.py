@@ -81,6 +81,17 @@ class Handler(BaseHTTPRequestHandler):
             return False
         return self.headers.get("X-ReachDesk") == "1"
 
+    def _refuse(self, reason: str) -> None:
+        """Read the unwanted body first: closing with unread data can reset the reply away."""
+        try:
+            length = min(int(self.headers.get("Content-Length") or 0), MAX_BODY)
+            if length > 0:
+                self.connection.settimeout(5)  # a client that never sends must not hold a thread
+                self.rfile.read(length)
+        except (ValueError, OSError):
+            self.close_connection = True
+        self._json({"error": reason}, 403)
+
     # --------------------------------------------------------------- replies
     def _send(self, status: int, payload: bytes, ctype: str, extra: dict | None = None) -> None:
         self.send_response(status)
@@ -109,10 +120,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def _run(self, method: str) -> None:
         if not self._host_ok():
-            return self._json({"error": "forbidden host"}, 403)
+            return self._refuse("forbidden host")
         parts = urlsplit(self.path)
         if method == "POST" and not self._write_ok():
-            return self._json({"error": "forbidden origin"}, 403)
+            return self._refuse("forbidden origin")
         if method == "GET" and parts.path in STATIC:
             name, ctype = STATIC[parts.path]
             return self._send(200, resources.files("reachdesk").joinpath("static", name).read_bytes(), ctype)
