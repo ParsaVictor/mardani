@@ -10,6 +10,21 @@ requires-python = ">=3.10"
 license = { file = "LICENSE" }
 dynamic = ["version"]
 dependencies = []
+authors = [{ name = "Mohammad Parsa Karkooti" }]
+keywords = ["outreach", "job-search", "lead-generation", "local-first", "machine-learning"]
+classifiers = [
+    "Environment :: Web Environment",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Natural Language :: English",
+    "Natural Language :: Persian",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://github.com/ParsaVictor/mardani"
+Issues = "https://github.com/ParsaVictor/mardani/issues"
+Changelog = "https://github.com/ParsaVictor/mardani/blob/main/CHANGELOG.md"
 
 [project.scripts]
 reachdesk = "reachdesk.cli:main"

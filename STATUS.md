@@ -109,6 +109,14 @@ python run.py serve
 
 فعلاً مشکل بازی ثبت نشده است.
 
+## وضعیت ریپو
+
+- آدرس: <https://github.com/ParsaVictor/mardani> (عمومی، مجوز AGPL-3.0)
+- نسخهٔ منتشرشده: [v0.1.0](https://github.com/ParsaVictor/mardani/releases/tag/v0.1.0)
+- روش کار: هر تغییر روی branch جدا و با PR به `main` می‌رود. CI روی لینوکس و ویندوز اجرا می‌شود.
+- برای نسخهٔ جدید: `__version__` و `CHANGELOG.md` را به‌روز کن، بعد روی `main` یک release بساز.
+- گزارش مشکل امنیتی به‌صورت خصوصی فعال است و Dependabot هر ماه GitHub Actions را بررسی می‌کند.
+
 ## نقشهٔ کد
 
 | مسیر | چیست |

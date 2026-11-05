@@ -1,8 +1,13 @@
 # ReachDesk
 
+[![CI](https://github.com/ParsaVictor/mardani/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ParsaVictor/mardani/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/ParsaVictor/mardani)](https://github.com/ParsaVictor/mardani/releases)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](pyproject.toml)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+
 **A self-learning outreach and opportunity desk.** ReachDesk ranks people, posts and jobs by what you actually want, writes a personal message for each one, handles connect-first sequencing, and sends email automatically where you have grounds to. It runs on your own computer, needs no API keys, and spends no LLM tokens.
 
-[فارسی](README.fa.md) · [Roadmap](docs/ROADMAP.md) · [Architecture](docs/ARCHITECTURE.md) · [Compliance](docs/COMPLIANCE.md) · [Business model](docs/BUSINESS.md)
+[فارسی](README.fa.md) · [Roadmap](docs/ROADMAP.md) · [Architecture](docs/ARCHITECTURE.md) · [Compliance](docs/COMPLIANCE.md) · [Business model](docs/BUSINESS.md) · [Project status](STATUS.md) · [Changelog](CHANGELOG.md)
 
 ## What it does
 
@@ -73,6 +78,10 @@ python run.py test
 ```
 
 CI runs this on Linux and Windows for Python 3.10 and 3.12. The suite includes a held-out benchmark where the keyword rules cannot separate good from bad, so any gain comes from learning. See [Architecture](docs/ARCHITECTURE.md#evidence).
+
+## Contributing and security
+
+See [Contributing](CONTRIBUTING.md) and the [Code of conduct](CODE_OF_CONDUCT.md). Report vulnerabilities privately, as described in the [Security policy](SECURITY.md).
 
 ## License
 
