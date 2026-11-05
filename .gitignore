@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.db
+*.db-wal
+*.db-shm
+.env
+.claude/
+.venv/
+dist/
+build/
+*.egg-info/
+# Contact data and signing keys must never reach the repository
+Connections.csv
+*signing_key*

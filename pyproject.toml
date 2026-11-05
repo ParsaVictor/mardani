@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reachdesk"
+description = "Self-learning outreach and opportunity desk: human-sent LinkedIn, automatic consent-gated email, local and free."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dynamic = ["version"]
+dependencies = []
+
+[project.scripts]
+reachdesk = "reachdesk.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "reachdesk.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+reachdesk = ["static/*"]
