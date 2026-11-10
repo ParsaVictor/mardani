@@ -10,7 +10,7 @@ from importlib import resources
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-from . import __version__, channels, db, plans, scoring, service
+from . import __version__, autopilot, channels, db, plans, scoring, service
 
 MAX_BODY = 25_000_000
 STATIC = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/style.css": ("style.css", "text/css; charset=utf-8")}
@@ -159,6 +159,7 @@ def route(conn, method: str, path: str, q: dict, b: dict, request_retrain):
                 "version": __version__, "campaigns": service.list_campaigns(conn), "plan": service.plan(conn),
                 "plans": plans.PLANS, "reasons": scoring.REASONS, "consent_bases": service.CONSENT_BASES,
                 "smtp": {k: service.get_setting(conn, k) for k in ("smtp_host", "smtp_port", "smtp_user", "smtp_from", "email_attachment")},
+                "autopilot": {k: service.get_setting(conn, k) or autopilot.DEFAULTS[k] for k in autopilot.SETTING_KEYS},
                 "smtp_password_set": bool(channels.smtp_config(conn)["password"]),
             }
         cid = int(q.get("campaign", 0))
@@ -189,7 +190,7 @@ def route(conn, method: str, path: str, q: dict, b: dict, request_retrain):
         service.set_setting(conn, "license", token)
         return service.plan(conn)
     if path == "/api/settings":
-        for key in ("smtp_host", "smtp_port", "smtp_user", "smtp_from", "email_attachment"):
+        for key in ("smtp_host", "smtp_port", "smtp_user", "smtp_from", "email_attachment", *autopilot.SETTING_KEYS):
             if key in b:
                 service.set_setting(conn, key, str(b[key]))
         return {"ok": True}
@@ -264,10 +265,7 @@ def auto_loop(db_path: str, stop: threading.Event, interval: float = 900.0) -> N
     while not stop.wait(interval):
         conn = db.connect(db_path)
         try:
-            for campaign in service.list_campaigns(conn):
-                if campaign["auto_email"]:
-                    service.build_queue(conn, campaign["id"])
-                    channels.dispatch_email(conn, campaign["id"])
+            autopilot.run_once(conn)
         except Exception as exc:  # the loop must survive a bad network or SMTP moment
             service.audit(conn, "auto_loop_error", str(exc)[:300])
             conn.commit()

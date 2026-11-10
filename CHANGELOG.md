@@ -4,7 +4,15 @@ Notable changes to ReachDesk. Versions follow [semantic versioning](https://semv
 
 ## Unreleased
 
-Nothing yet.
+### Added
+
+- `run.py autopilot`: unattended find, write and send for every auto-email campaign, with `--loop` and `--schedule`.
+- Sending window and a random gap between emails, set in **Settings → Autopilot**.
+- Job ads that publish an address and ask for CVs there are now answered by email.
+
+### Changed
+
+- The dashboard's background loop runs the autopilot pass, so it respects the sending window and fetches job boards at most every 6 hours.
 
 ## 0.1.0 (2026-11-04)
 

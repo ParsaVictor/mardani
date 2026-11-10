@@ -8,7 +8,7 @@ import secrets
 import sys
 from pathlib import Path
 
-from . import channels, db, plans, seed, server, service
+from . import autopilot, channels, db, plans, seed, server, service
 
 HOME = Path(os.environ.get("REACHDESK_HOME") or Path.home() / ".reachdesk")
 DEFAULT_DB = HOME / "workspace.db"
@@ -26,6 +26,11 @@ def main(argv: list[str] | None = None) -> int:
     for name, text in (("fetch", "pull jobs from public job boards"), ("queue", "prepare today's messages"), ("dispatch", "send permitted email now")):
         command = sub.add_parser(name, help=text)
         command.add_argument("campaign", help="campaign slug")
+    auto = sub.add_parser("autopilot", help="find, write and send email for every auto-email campaign, unattended")
+    auto.add_argument("--loop", action="store_true", help="keep running (one pass every --every minutes)")
+    auto.add_argument("--every", type=int, default=30, help="minutes between passes with --loop")
+    auto.add_argument("--no-fetch", action="store_true", help="skip pulling new job postings")
+    auto.add_argument("--schedule", action="store_true", help="print the command that schedules a pass every 30 minutes")
     imp = sub.add_parser("import", help="import a CSV (LinkedIn Connections.csv or generic)")
     imp.add_argument("campaign")
     imp.add_argument("file")
@@ -46,6 +51,19 @@ def main(argv: list[str] | None = None) -> int:
             seed.seed(conn)
             conn.close()
             server.serve(args.db, args.port)
+            return 0
+        if args.command == "autopilot":
+            if args.schedule:
+                run_py = Path(sys.argv[0]).resolve()
+                commands = autopilot.schedule_commands(sys.executable, str(run_py), str(Path(args.db).resolve()))
+                print("Windows (Command Prompt):\n  " + commands["windows"] + "\n\nLinux / macOS (crontab -e):\n  " + commands["linux_mac_cron"])
+                return 0
+            seed.seed(conn)
+            emit = lambda report: print(json.dumps(report, ensure_ascii=False, indent=2), flush=True)  # noqa: E731
+            if args.loop:
+                autopilot.run_loop(conn, args.every, on_report=emit, fetch=not args.no_fetch)
+            else:
+                emit(autopilot.run_once(conn, fetch=not args.no_fetch))
             return 0
         if args.command == "seed":
             print(json.dumps({"created": seed.seed(conn)}))
