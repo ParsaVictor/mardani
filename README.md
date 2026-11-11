@@ -52,6 +52,16 @@ Open <http://127.0.0.1:8765/>. Two campaigns are ready: **Consultants in Canada*
 
 Set the SMTP account in **Settings**, put the password in the `REACHDESK_SMTP_PASSWORD` environment variable, and enable automatic email on the campaign (Pro plan or higher). A free Gmail account with an [app password](https://support.google.com/accounts/answer/185833) works: server `smtp.gmail.com`, port `587`.
 
+### Send desk: one page for today's LinkedIn sends
+
+Each person gets one card: name, title, a clickable LinkedIn profile link, why they scored, and the exact text to paste. **Copy text and open profile** copies the text and opens the profile; you click Send on LinkedIn, then **Sent**. Open it from **Today → Open send desk** while the dashboard runs, or write it as one standalone HTML file:
+
+```bash
+python run.py desk ca-consultants
+```
+
+The page is built by plain Python from your queue: no AI model, no API key, no tokens.
+
 ### Autopilot: nobody at the computer
 
 `autopilot` does the whole job in one pass for every campaign with automatic email on: it pulls new postings from the campaign's job boards (at most every 6 hours), picks the best contacts, writes each one a personal message from your templates, and sends the permitted emails. Emails go out only inside the sending window (weekdays 9 to 17 by default) with a random 45 to 150 second gap between them, so a burst never trips the mail provider's limits. Every safety rule still applies at send time: consent basis, opt-outs, the daily cap and the 90-day cooldown.

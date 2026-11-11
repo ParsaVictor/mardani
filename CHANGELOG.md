@@ -8,6 +8,7 @@ Notable changes to ReachDesk. Versions follow [semantic versioning](https://semv
 
 - `run.py autopilot`: unattended find, write and send for every auto-email campaign, with `--loop` and `--schedule`.
 - Sending window and a random gap between emails, set in **Settings → Autopilot**.
+- Send desk (`/desk` and `run.py desk <campaign>`): one card per person with a clickable profile link and the text to paste.
 - Job ads that publish an address and ask for CVs there are now answered by email.
 
 ### Changed

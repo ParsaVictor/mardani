@@ -10,10 +10,11 @@ from importlib import resources
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-from . import __version__, autopilot, channels, db, plans, scoring, service
+from . import __version__, autopilot, channels, db, desk, plans, scoring, service
 
 MAX_BODY = 25_000_000
-STATIC = {"/": ("index.html", "text/html; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/style.css": ("style.css", "text/css; charset=utf-8")}
+STATIC = {"/": ("index.html", "text/html; charset=utf-8"), "/desk": ("desk.html", "text/html; charset=utf-8"),
+          "/desk.js": ("desk.js", "text/javascript; charset=utf-8"), "/desk.css": ("desk.css", "text/css; charset=utf-8"), "/app.js": ("app.js", "text/javascript; charset=utf-8"), "/style.css": ("style.css", "text/css; charset=utf-8")}
 SECURITY_HEADERS = {
     "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
     "X-Content-Type-Options": "nosniff",
@@ -154,6 +155,13 @@ class Handler(BaseHTTPRequestHandler):
 def route(conn, method: str, path: str, q: dict, b: dict, request_retrain):
     """All API routes. Returns JSON-able data, or (text, content_type) for downloads."""
     if method == "GET":
+        if path == "/api/desk":
+            slug = q.get("campaign") or ""
+            campaign = service.get_campaign(conn, slug=slug) if slug else next(
+                (c for c in service.list_campaigns(conn) if service.list_queue(conn, c["id"])), None) or (service.list_campaigns(conn) or [None])[0]
+            if not campaign:
+                raise KeyError(slug or "campaign")
+            return desk.entries(conn, campaign["id"])
         if path == "/api/bootstrap":
             return {
                 "version": __version__, "campaigns": service.list_campaigns(conn), "plan": service.plan(conn),

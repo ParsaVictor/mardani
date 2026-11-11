@@ -1,6 +1,6 @@
 "use strict";
 const FA = {
-  "Today": "امروز", "Saved posts": "پست‌های ذخیره‌شده", "Jobs": "آگهی‌ها", "People": "افراد", "Find": "جستجو", "Add": "افزودن", "Templates": "متن‌ها", "Insights": "نتایج", "Settings": "تنظیمات",
+  "Open send desk": "باز کردن میز ارسال", "Today": "امروز", "Saved posts": "پست‌های ذخیره‌شده", "Jobs": "آگهی‌ها", "People": "افراد", "Find": "جستجو", "Add": "افزودن", "Templates": "متن‌ها", "Insights": "نتایج", "Settings": "تنظیمات",
   "Ready to send": "آمادهٔ ارسال", "Prepare today's messages": "آماده‌سازی پیام‌های امروز", "Copy & open": "کپی و باز کردن", "I sent it": "فرستادم", "Skip": "رد کردن", "Copy text": "کپی متن",
   "Connection request": "درخواست کانکت", "Message": "پیام", "Follow-up": "پیگیری", "Email (automatic)": "ایمیل (خودکار)", "Waiting for acceptance": "در انتظار قبول کانکت", "They accepted": "قبول کرد",
   "Sent, awaiting a reply": "ارسال‌شده، در انتظار پاسخ", "Replied": "پاسخ داد", "Interested": "علاقه‌مند", "Opted out": "لغو تماس", "Send permitted email now": "ارسال ایمیل‌های مجاز",
@@ -102,6 +102,7 @@ async function pageToday() {
     h("div", {}, h("h2", {}, `${t("Ready to send")} (${ready.length})`)),
     h("div", { class: "row" },
       c.auto_email ? h("button", { class: "btn", type: "button", onclick: async () => { const r = await api(`/api/campaigns/${campaignId}/dispatch`, {}); toast(r.reason || `${r.sent} ${t("Sent")}`); render(); } }, t("Send permitted email now")) : null,
+      h("a", { class: "btn", href: `/desk?campaign=${encodeURIComponent(c.slug)}`, target: "_blank", rel: "noopener" }, t("Open send desk")),
       h("button", { class: "btn primary", type: "button", onclick: buildQueue }, t("Prepare today's messages"))));
   const cards = ready.map(queueCard);
   const waiting = sent.filter((o) => o.step === "connect");
