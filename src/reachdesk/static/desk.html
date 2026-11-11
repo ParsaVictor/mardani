@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReachDesk · Send desk</title>
+<link rel="stylesheet" href="/desk.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div>
+      <h1 id="title">ارسال امروز</h1>
+      <p class="sub">روی «کپی و باز کردن» بزن، در لینکدین متن را بچسبان و Send کن، بعد «فرستادم».</p>
+    </div>
+    <div class="nums"><b id="left">0</b><span>مانده</span><b id="today" dir="ltr">0</b><span>ارسال امروز</span></div>
+  </header>
+  <div id="note" class="notice" hidden></div>
+  <ol id="cards" class="cards"></ol>
+  <p id="empty" class="empty" hidden>امروز پیامی برای ارسال نمانده است.</p>
+</main>
+<div id="toast" class="toast" role="status"></div>
+<script src="/desk.js"></script>
+</body>
+</html>

@@ -161,9 +161,10 @@ def add_item(conn, campaign_id: int, record: dict, enforce: bool = True, commit:
     analysis = textparse.analyze_post(body)
     item.setdefault("intents", analysis["intents"])
     item.setdefault("flags", analysis["flags"])
-    item["role_hint"] = item.get("role_hint") or analysis["role_hint"]
+    item["role_hint"] = item.get("role_hint") or analysis["role_hint"] or (item.get("title", "") if kind == "job" else "")
     item["email"] = item.get("email") or analysis["email"]
-    if kind == "post" and item["email"] and "cta_cv" in item["intents"] and not campaign["commercial"]:
+    # A post or job ad that publishes an address and asks for CVs there invites exactly this email.
+    if kind in ("post", "job") and item["email"] and "cta_cv" in item["intents"] and not campaign["commercial"]:
         item["consent_basis"] = item.get("consent_basis") or "invited_by_post"
 
     key = textparse.normalize_url(item["url"]) or textparse.stable_key(item.get("full_name", ""), item.get("company", ""), body[:300], item.get("email", ""))
@@ -429,7 +430,8 @@ def build_queue(conn, campaign_id: int, rng: random.Random | None = None) -> dic
 
     candidates = rows(
         conn.execute(
-            "SELECT * FROM items WHERE campaign_id=? AND kind IN ('person','post') AND status IN ('new','saved') AND score>=? ORDER BY score DESC",
+            "SELECT * FROM items WHERE campaign_id=? AND (kind IN ('person','post') OR (kind='job' AND email!='')) "
+            "AND status IN ('new','saved') AND score>=? ORDER BY score DESC",
             (campaign_id, campaign["min_score"]),
         )
     )

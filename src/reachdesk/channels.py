@@ -56,8 +56,12 @@ def open_smtp(config: dict) -> smtplib.SMTP:
     return client
 
 
-def dispatch_email(conn, campaign_id: int, smtp_factory=open_smtp) -> dict:
-    """Send every ready email the campaign is allowed to send today."""
+def dispatch_email(conn, campaign_id: int, smtp_factory=open_smtp, pause=None) -> dict:
+    """Send every ready email the campaign is allowed to send today.
+
+    ``pause`` runs between two sends (the autopilot spaces emails out so a burst
+    never trips the mail provider's sending limits).
+    """
     campaign = service.get_campaign(conn, campaign_id)
     plan = service.plan(conn)
     report = {"sent": 0, "failed": 0, "blocked": 0, "reason": ""}
@@ -93,6 +97,8 @@ def dispatch_email(conn, campaign_id: int, smtp_factory=open_smtp) -> dict:
                 conn.execute("UPDATE outreach SET status='skipped', error='blocked at send time' WHERE id=?", (entry["id"],))
                 report["blocked"] += 1
                 continue
+            if pause and report["sent"]:
+                pause()
             try:
                 client.send_message(compose(entry, config, campaign))
                 service.mark_sent(conn, entry["id"])

@@ -1,6 +1,6 @@
 "use strict";
 const FA = {
-  "Today": "امروز", "Saved posts": "پست‌های ذخیره‌شده", "Jobs": "آگهی‌ها", "People": "افراد", "Find": "جستجو", "Add": "افزودن", "Templates": "متن‌ها", "Insights": "نتایج", "Settings": "تنظیمات",
+  "Open send desk": "باز کردن میز ارسال", "Today": "امروز", "Saved posts": "پست‌های ذخیره‌شده", "Jobs": "آگهی‌ها", "People": "افراد", "Find": "جستجو", "Add": "افزودن", "Templates": "متن‌ها", "Insights": "نتایج", "Settings": "تنظیمات",
   "Ready to send": "آمادهٔ ارسال", "Prepare today's messages": "آماده‌سازی پیام‌های امروز", "Copy & open": "کپی و باز کردن", "I sent it": "فرستادم", "Skip": "رد کردن", "Copy text": "کپی متن",
   "Connection request": "درخواست کانکت", "Message": "پیام", "Follow-up": "پیگیری", "Email (automatic)": "ایمیل (خودکار)", "Waiting for acceptance": "در انتظار قبول کانکت", "They accepted": "قبول کرد",
   "Sent, awaiting a reply": "ارسال‌شده، در انتظار پاسخ", "Replied": "پاسخ داد", "Interested": "علاقه‌مند", "Opted out": "لغو تماس", "Send permitted email now": "ارسال ایمیل‌های مجاز",
@@ -13,6 +13,7 @@ const FA = {
   "Open these searches yourself, then save the results you want. The app never browses LinkedIn for you.": "این جستجوها را خودتان باز کنید و نتیجه‌های دلخواه را ذخیره کنید. برنامه هرگز به‌جای شما در لینکدین نمی‌گردد.",
   "Campaign": "کمپین", "Website": "وبسایت", "Sender name": "نام فرستنده", "Sender contact (email or phone)": "راه تماس فرستنده", "Daily limit": "سقف روزانه", "Connection note limit": "سقف طول یادداشت کانکت", "Minimum score": "حداقل امتیاز", "Commercial campaign (adds Canadian anti-spam checks)": "کمپین تجاری (بررسی‌های ضد اسپم کانادا)", "Send permitted email automatically": "ارسال خودکار ایمیل‌های مجاز", "Email subject": "موضوع ایمیل",
   "Email account (SMTP)": "حساب ایمیل (SMTP)", "Server": "سرور", "Port": "پورت", "Username": "نام کاربری", "From address": "آدرس فرستنده", "File to attach to career emails": "فایل پیوست ایمیل‌های شغلی", "Set the password in the REACHDESK_SMTP_PASSWORD environment variable. It is never stored.": "رمز را در متغیر محیطی REACHDESK_SMTP_PASSWORD بگذارید. هرگز ذخیره نمی‌شود.",
+  "Autopilot (unattended sending)": "خلبان خودکار (ارسال بدون حضور)", "Sending days (0=Mon … 6=Sun)": "روزهای ارسال (۰=دوشنبه … ۶=یکشنبه)", "Sending hours (local, e.g. 9-17)": "ساعت ارسال (محلی، مثلاً 9-17)", "Min seconds between emails": "حداقل فاصلهٔ دو ایمیل (ثانیه)", "Max seconds between emails": "حداکثر فاصلهٔ دو ایمیل (ثانیه)", "Schedule `python run.py autopilot` every 30 minutes, or run `python run.py autopilot --loop`. Every campaign with automatic email on is fetched, queued and sent.": "دستور `python run.py autopilot` را هر ۳۰ دقیقه زمان‌بندی کن، یا `python run.py autopilot --loop` را اجرا کن. هر کمپینی که ایمیل خودکارش روشن است جستجو، صف‌بندی و ارسال می‌شود.",
   "License": "لایسنس", "Activate": "فعال‌سازی", "Plan": "پلن", "Saved items": "موردها", "Requests sent": "کانکت ارسالی", "Accepted": "قبول‌شده", "Messages sent": "پیام ارسالی", "Replies": "پاسخ‌ها", "Positive": "مثبت", "Ready": "آماده",
   "Learning": "یادگیری", "Ratings": "امتیازها", "Early accuracy": "دقت اولیه", "Recent accuracy": "دقت اخیر", "Model influence": "اثر مدل", "Learned likes": "ترجیح‌های یادگرفته", "Learned dislikes": "موارد نامطلوب یادگرفته", "Rejection reasons": "دلیل‌های رد",
   "Add a variant": "افزودن نسخه", "Name": "نام", "Step": "مرحله", "Text": "متن", "Available fields": "فیلدها", "Sent": "ارسال", "Consent basis": "مبنای تماس", "Delete everything stored about this contact and never contact them again?": "همهٔ اطلاعات این مخاطب حذف شود و دیگر با او تماس گرفته نشود؟",
@@ -101,6 +102,7 @@ async function pageToday() {
     h("div", {}, h("h2", {}, `${t("Ready to send")} (${ready.length})`)),
     h("div", { class: "row" },
       c.auto_email ? h("button", { class: "btn", type: "button", onclick: async () => { const r = await api(`/api/campaigns/${campaignId}/dispatch`, {}); toast(r.reason || `${r.sent} ${t("Sent")}`); render(); } }, t("Send permitted email now")) : null,
+      h("a", { class: "btn", href: `/desk?campaign=${encodeURIComponent(c.slug)}`, target: "_blank", rel: "noopener" }, t("Open send desk")),
       h("button", { class: "btn primary", type: "button", onclick: buildQueue }, t("Prepare today's messages"))));
   const cards = ready.map(queueCard);
   const waiting = sent.filter((o) => o.step === "connect");
@@ -268,6 +270,9 @@ function pageSettings() {
   const commercial = h("input", { type: "checkbox", checked: !!c.commercial }); const auto = h("input", { type: "checkbox", checked: !!c.auto_email, disabled: !boot.plan.auto_email });
   const s = boot.smtp;
   const [host, hostF] = input("Server", s.smtp_host); const [port, portF] = input("Port", s.smtp_port || "587"); const [user, userF] = input("Username", s.smtp_user); const [from, fromF] = input("From address", s.smtp_from); const [att, attF] = input("File to attach to career emails", s.email_attachment);
+  const ap = boot.autopilot || {};
+  const [days, daysF] = input("Sending days (0=Mon … 6=Sun)", ap.autopilot_days); const [hours, hoursF] = input("Sending hours (local, e.g. 9-17)", ap.autopilot_hours);
+  const [gapMin, gapMinF] = input("Min seconds between emails", ap.autopilot_gap_min, "number"); const [gapMax, gapMaxF] = input("Max seconds between emails", ap.autopilot_gap_max, "number");
   const token = h("input", { class: "ltr" });
   return h("div", {}, h("h2", {}, t("Settings")), h("p", { class: "sub" }),
     h("section", { class: "card" }, h("h3", {}, `${t("Campaign")}: ${c.name}`), siteF, nameF, contactF, capF, limitF, minF, subjectF,
@@ -279,6 +284,8 @@ function pageSettings() {
       } }, t("Save"))),
     h("section", { class: "card" }, h("h3", {}, t("Email account (SMTP)")), h("p", { class: "meta" }, t("Set the password in the REACHDESK_SMTP_PASSWORD environment variable. It is never stored.")), hostF, portF, userF, fromF, attF,
       h("button", { class: "btn", type: "button", onclick: async () => { await api("/api/settings", { smtp_host: host.value, smtp_port: port.value, smtp_user: user.value, smtp_from: from.value, email_attachment: att.value }); boot = await api("/api/bootstrap"); toast(t("Saved")); } }, t("Save"))),
+    h("section", { class: "card" }, h("h3", {}, t("Autopilot (unattended sending)")), h("p", { class: "meta" }, t("Schedule `python run.py autopilot` every 30 minutes, or run `python run.py autopilot --loop`. Every campaign with automatic email on is fetched, queued and sent.")), daysF, hoursF, gapMinF, gapMaxF,
+      h("button", { class: "btn", type: "button", onclick: async () => { await api("/api/settings", { autopilot_days: days.value, autopilot_hours: hours.value, autopilot_gap_min: gapMin.value, autopilot_gap_max: gapMax.value }); boot = await api("/api/bootstrap"); toast(t("Saved")); } }, t("Save"))),
     h("section", { class: "card" }, h("h3", {}, t("License")), h("p", { class: "meta" }, `${t("Plan")}: ${boot.plan.label}${boot.plan.customer ? " · " + boot.plan.customer : ""}`), token, " ",
       h("button", { class: "btn", type: "button", onclick: async () => { await api("/api/license", { token: token.value }); boot = await api("/api/bootstrap"); chrome(); toast(t("Saved")); render(); } }, t("Activate"))));
 }
