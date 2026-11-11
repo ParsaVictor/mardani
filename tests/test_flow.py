@@ -349,3 +349,27 @@ class Licenses(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SeniorCampaign(Base):
+    def test_ranks_senior_canadians_above_juniors_and_outsiders(self):
+        cid = service.get_campaign(self.conn, slug="ca-senior")["id"]
+        people = {
+            "dir": ("Director of Marketing", "Toronto, Ontario, Canada"),
+            "sen": ("Senior Consultant, Strategy", "Vancouver, BC, Canada"),
+            "jun": ("Junior Marketing Coordinator", "Toronto, Ontario, Canada"),
+            "usa": ("Director of Marketing", "Austin, Texas, United States"),
+        }
+        scores = {}
+        for key, (title, location) in people.items():
+            item, _ = service.add_item(self.conn, cid, {"kind": "person", "full_name": f"Alex {key.title()}", "title": title, "location": location,
+                                                        "url": f"https://www.linkedin.com/in/alex-{key}"})
+            scores[key] = item["score"]
+        campaign = service.get_campaign(self.conn, slug="ca-senior")
+        self.assertGreaterEqual(min(scores["dir"], scores["sen"]), campaign["min_score"])
+        self.assertLess(max(scores["jun"], scores["usa"]), campaign["min_score"])
+
+    def test_search_links_open_linkedin_people_search_in_canada(self):
+        links = service.search_links(service.get_campaign(self.conn, slug="ca-senior"))
+        self.assertTrue(links)
+        self.assertTrue(all(l["url"].startswith("https://www.linkedin.com/search/results/people/") and "geoUrn" in l["url"] for l in links))

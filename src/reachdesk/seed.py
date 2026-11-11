@@ -44,6 +44,46 @@ CONSULTANTS = {
     ],
 }
 
+SENIOR = {
+    "slug": "ca-senior",
+    "name": "Senior consultants and marketers in Canada",
+    "commercial": 1,
+    "daily_cap": 20,
+    "note_limit": 200,
+    "min_score": 0.6,
+    "email_subject": "A question about your work",
+    "keywords": {
+        # Exact senior roles score highest; a plain "consultant" or "marketing" title is adjacent.
+        "core": [
+            "senior consultant", "principal consultant", "managing consultant", "senior advisor", "senior manager",
+            "marketing director", "director of marketing", "head of marketing", "vp marketing", "vp, marketing",
+            "vice president, marketing", "vice president of marketing", "cmo", "chief marketing officer",
+            "marketing manager", "senior marketing manager", "growth lead", "head of growth", "brand director", "partner",
+        ],
+        "title": ["consultant", "consulting", "advisor", "marketing", "marketer", "growth", "brand", "director", "head of", "principal"],
+        "body": ["b2b", "strategy", "clients", "campaigns", "demand generation", "go-to-market", "brand", "advisory"],
+        "negative": ["junior", "intern", "internship", "student", "assistant", "coordinator", "looking for work", "retired"],
+        "location": CANADA,
+        "location_exclude": NOT_CANADA,
+    },
+    "searches": [
+        {"label": "Senior consultants in Canada", "query": "senior consultant", "type": "people", "canada": True},
+        {"label": "Principal and managing consultants", "query": "principal consultant OR managing consultant", "type": "people", "canada": True},
+        {"label": "Marketing directors in Canada", "query": "marketing director", "type": "people", "canada": True},
+        {"label": "Heads of marketing and CMOs", "query": "\"head of marketing\" OR CMO", "type": "people", "canada": True},
+        {"label": "Senior marketing managers", "query": "senior marketing manager", "type": "people", "canada": True},
+    ],
+    "variants": [
+        ("connect-a", "connect", "{greeting} I work with consultants and marketing leaders across Canada and would be glad to connect."),
+        ("message-a", "message",
+         "{greeting}\n\nThanks for connecting. I'm {sender_name}. We built something that may be useful in your work{at_company}, and you can see it here: {website}\n\n"
+         "I'd value your opinion if you have a moment.\n\n{sender_name} | {sender_contact}\n{opt_out}"),
+        ("email-a", "email",
+         "{greeting}\n\nI'm {sender_name}. I found your business contact details and thought this may be relevant to your work{at_company}: {website}\n\n"
+         "I'd value your opinion if you have a moment.\n\n{sender_name} | {sender_contact}\n{opt_out}"),
+    ],
+}
+
 INTRO = (
     "I'm Mohammad Parsa Karkooti, a Computer Vision and Deep Learning engineer with Full-Stack skills and good intermediate English. "
     "{role_hook}I would be very glad if you visited my website: {website}\n\n"
@@ -93,7 +133,7 @@ CAREER = {
 
 def seed(conn) -> list[str]:
     created = []
-    for spec in (CONSULTANTS, CAREER):
+    for spec in (CONSULTANTS, CAREER, SENIOR):
         if service.get_campaign(conn, slug=spec["slug"]):
             continue
         spec = dict(spec)
